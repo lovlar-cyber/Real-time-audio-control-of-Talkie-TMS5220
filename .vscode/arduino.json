@@ -1,0 +1,6 @@
+{
+    "sketch": "master.ino",
+    "board": "arduino:avr:uno",
+    "port": "/dev/tty.wchusbserial1420",
+    "programmer": "AVR ISP"
+}
