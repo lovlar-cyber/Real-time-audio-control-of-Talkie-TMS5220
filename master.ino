@@ -39,7 +39,7 @@
 #endif
 
 Talkie voice;
-int pin = 3;
+//int pin = 3;
 int sensorValue = 0;
 int phoneme = 0;
 int pitch = 0;
@@ -75,14 +75,63 @@ uint32_t Ag, Aa;
 // for a human.
 //#define OUTPUT_BINARY_ACCELGYRO
 
-#define LED_PIN 13
-bool blinkState = false;
+////LED MATRIX THINGS
+/////////////////////
+const int columnPins[] = {4,5,6,7};
+const int rowPins[] = {8,9,10,12,13};
+int incomingByte = 1;
+byte A[] = {
+  B10000,
+  B10000,
+  B10000,
+  B10000,
+  B10000
+};
+byte B[] = {
+  B01000,
+  B01000,
+  B01000,
+  B01000,
+  B01000
+};
+byte C[] = {
+  B00100,
+  B00100,
+  B00100,
+  B00100,
+  B00100
+};
+byte D[] = {
+  B00010,
+  B00010,
+  B00010,
+  B00010,
+  B00010
+};
+byte E[] = {
+  B00001,
+  B00001,
+  B00001,
+  B00001,
+  B00001
+};
+//Interaction things
+////////////////////
 int32_t endtime, starttime;
 int8_t interactionDuration = 30;
 void setup()
 {
+    ////LED MATRIX THINGS
+    /////////////////////
+    for (int i = 0; i < 6; i++)
+    {
+        pinMode(rowPins[i], OUTPUT);
+        pinMode(columnPins[i], OUTPUT);
+        digitalWrite(columnPins[i], HIGH);
+    }
 
-    //TALKIE things
+    ////TALKIE things
+    /////////////////
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(115200);
 #if defined(__AVR_ATmega32U4__)
@@ -140,44 +189,52 @@ void setup()
     voice.say(sp5_INSTRUMENTS);
 
     // configure Arduino LED pin for output
-    pinMode(LED_PIN, OUTPUT);
+    //pinMode(LED_PIN, OUTPUT);
 }
 
 void loop()
 {
-    voice->useFakeEnergy = false;
+    voice.setFakeEnergy(false, 0);
 
+    voice.say(spt_YOU);
 
-/*
-spt_YOU
-spt_CAN
-spt_PLAY
-spt_WITH
-spa_THE
-operational
-sp2_RED
-spt_JOYSTICK
-spa_IN_
-spa_THREE
-spa_TWO
-spa_ONE
-warpactivated
-*/
+    voice.say(spt_CAN);
+    voice.say(spt_PLAY);
+    voice.say(spt_WITH);
+    voice.say(spa_THE);
+    voice.say(operational);
+    voice.say(sp2_RED);
+    voice.say(spt_JOYSTICK);
+    voice.say(spa_IN_);
+    voice.say(spa_THREE);
+    voice.say(spa_TWO);
+    voice.say(spa_ONE);
+    voice.say(warpactivated);
 
     starttime = millis();
     endtime = starttime;
-    while ((endtime - starttime) <= interactionDuration * 1000) // do this loop for up to 1000mS
+    while ((endtime - starttime) < (interactionDuration * 1000)) // do this loop for up to 1000mS
     {
-        voice->useFakeEnergy=true;
-
+        voice.setFakeEnergy(true, 14);
 
         accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-        phoneme = map(ax, -32768, 32767, 0, 60);
+        phoneme = map(ax, -32768, 32767, 0, 43);
         pitch = map(ay, -32768, 32767, 0, 37);
         Aa = sqrt((0.001 * ax * ax + 0.001 * ay * ay + 0.001 * az * az));
         Ag = sqrt((0.001 * gx * gx + 0.001 * gy * gy + 0.001 * gz * gz));
-        voice.setFakeEnergy(map(Ag, 0, 200, 1, 14));
+        voice.setFakeEnergy(true, map(Ag, 0, 200, 1, 14));
         voice.sayQ(ehmat[phoneme][pitch]);
+
+        if (incomingByte == 1)
+        {
+            show(A);
+            /*
+            show(B);
+            show(C);
+            show(D);
+            show(E);
+            */
+        }
 
         Serial.print("x,y:\t");
         Serial.print(phoneme);
@@ -188,12 +245,30 @@ warpactivated
         Serial.print("\t");
         Serial.println(Ag);
 
-        blinkState = !blinkState;
-        digitalWrite(LED_PIN, blinkState);
+        //blinkState = !blinkState;
+        //digitalWrite(LED_PIN, blinkState);
+
+        endtime = millis();
     }
 }
 
-void initLPC()
+
+void show( byte * image)
 {
-    return;
+  
+  
+    for(int row = 0; row < 5; row++){
+      digitalWrite(rowPins[row], HIGH);
+      for(int column = 0; column < 4; column++){
+        
+        bool pixel = bitRead(image[row], column);
+        if(pixel == 1){
+        digitalWrite(columnPins[column], LOW);
+        }
+        delayMicroseconds(300);
+        digitalWrite(columnPins[column], HIGH);
+      }
+      digitalWrite(rowPins[row], LOW);
+   
+}
 }
