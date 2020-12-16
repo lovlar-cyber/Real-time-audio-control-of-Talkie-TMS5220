@@ -1,6 +1,7 @@
 {
     "sketch": "master.ino",
-    "board": "arduino:avr:uno",
-    "port": "/dev/tty.wchusbserial1420",
-    "programmer": "AVR ISP"
+    "board": "arduino:avr:mega",
+    "port": "/dev/tty.wchusbserial1410",
+    "programmer": "AVR ISP",
+    "configuration": "cpu=atmega2560"
 }
