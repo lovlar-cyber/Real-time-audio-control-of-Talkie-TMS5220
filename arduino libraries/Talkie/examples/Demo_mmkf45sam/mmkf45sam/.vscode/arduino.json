@@ -1,0 +1,6 @@
+{
+    "programmer": "AVR ISP",
+    "board": "arduino:avr:uno",
+    "port": "/dev/tty.wchusbserial1410",
+    "sketch": "mmkf45sam.ino"
+}
